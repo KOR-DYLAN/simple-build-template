@@ -1,0 +1,35 @@
+# Set Toolchain
+AS      :=$(CROSS_COMPILE)gcc
+CC      :=$(CROSS_COMPILE)gcc
+AR      :=$(CROSS_COMPILE)ar
+LD      :=$(CROSS_COMPILE)ld.bfd
+CPP     :=$(CROSS_COMPILE)cpp
+OBJCOPY :=$(CROSS_COMPILE)objcopy
+OBJDUMP :=$(CROSS_COMPILE)objdump
+
+# ASM/C Compiler Options
+CFLAGS  +=-mgeneral-regs-only
+CFLAGS  +=-fno-builtin
+CFLAGS  +=-nostdlib
+CFLAGS  +=-mstrict-align
+CFLAGS  +=-ffunction-sections
+CFLAGS  +=-fdata-sections
+CFLAGS  +=-fno-common
+CFLAGS  +=-fno-jump-tables
+CFLAGS  +=-std=gnu99
+CFLAGS  +=-ffreestanding
+
+# Linker Options
+LDFLAGS +=-z noexecstack
+LDFLAGS +=--gc-sections
+
+# Build options according to build type
+ifeq ($(BUILD_TYPE),debug)
+    CFLAGS	+=-O0 -g -DDEBUG=1
+    LDFLAGS	+=-O0
+else ifeq ($(BUILD_TYPE),release)
+    CFLAGS	+=-O2 -DDEBUG=0
+    LDFLAGS	+=-O2
+else
+    $(error Unknown BUILD_TYPE...)
+endif

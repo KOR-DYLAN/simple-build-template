@@ -1,0 +1,13 @@
+include $(BUILD_BASE)/.config
+include script/Makefile.toolchain
+include $(PROJECT_BASE)/objects.mk
+
+ifneq ($(V),1)
+    Q:=@
+endif
+
+all: $(TARGET)
+
+%.a: $(obj)
+	@echo "[AR]        $@"
+	$(Q)$(AR) cr $@ $(obj)

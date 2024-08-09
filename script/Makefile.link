@@ -1,0 +1,21 @@
+include $(BUILD_BASE)/.config
+include script/Makefile.toolchain
+include $(PROJECT_BASE)/objects.mk
+include $(BUILD_BASE)/link_lists.mk
+
+ifneq ($(V),1)
+    Q:=@
+endif
+
+$(shell mkdir -p $(dir $(TARGET)))
+link_lib	:=$(addprefix -l,$(link_lib-y))
+
+all: $(TARGET)
+
+%.elf: $(obj) $(lds)
+	@echo "[LD]        $@"
+	$(Q)$(LD) $(LDFLAGS) -Map=$(basename $@).map --script $(lds) -o $@ $(obj) -L$(OUTPUT_BASE)/libs --whole-archive $(link_lib) --no-whole-archive
+	@echo "[BIN]       $(basename $@).bin"
+	$(Q)$(OBJCOPY) -O binary $@ $(basename $@).bin
+	@echo "[ASM]       $(basename $@).asm"
+	$(Q)$(OBJDUMP) -dx $@ > $(basename $@).asm

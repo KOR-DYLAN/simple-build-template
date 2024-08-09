@@ -1,0 +1,1 @@
+lib-$(CONFIG_PLATFORM_QEMU_VIRT)	+=qemu-virt
