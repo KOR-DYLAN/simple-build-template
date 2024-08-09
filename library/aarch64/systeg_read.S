@@ -1,0 +1,111 @@
+#include <library/common/asm_macros_common.S>
+
+    .macro define_sysreg_read_func _name
+        .global read_\_name
+    func read_\_name
+        mrs x0, \_name
+    endfunc read_\_name
+    .endm
+
+/* 
+ * read system register 
+ */
+define_sysreg_read_func par_el1
+define_sysreg_read_func id_pfr1_el1
+define_sysreg_read_func id_aa64isar0_el1
+define_sysreg_read_func id_aa64isar1_el1
+define_sysreg_read_func id_aa64pfr0_el1
+define_sysreg_read_func id_aa64pfr1_el1
+define_sysreg_read_func id_aa64dfr0_el1
+define_sysreg_read_func id_afr0_el1
+
+/* define_sysreg_read_func current_el */
+        .global read_current_el
+    func read_current_el
+        mrs x0, CurrentEl
+    endfunc read_current_el
+
+define_sysreg_read_func ctr_el0
+define_sysreg_read_func daif
+define_sysreg_read_func spsr_el1
+define_sysreg_read_func spsr_el2
+define_sysreg_read_func spsr_el3
+define_sysreg_read_func elr_el1
+define_sysreg_read_func elr_el2
+define_sysreg_read_func elr_el3
+define_sysreg_read_func mdccsr_el0
+define_sysreg_read_func dbgdtrrx_el0
+define_sysreg_read_func sp_el1
+define_sysreg_read_func sp_el2
+define_sysreg_read_func midr_el1
+define_sysreg_read_func mpidr_el1
+define_sysreg_read_func id_aa64mmfr0_el1
+define_sysreg_read_func id_aa64mmfr1_el1
+define_sysreg_read_func scr_el3
+define_sysreg_read_func hcr_el2
+define_sysreg_read_func vbar_el1
+define_sysreg_read_func vbar_el2
+define_sysreg_read_func vbar_el3
+define_sysreg_read_func sctlr_el1
+define_sysreg_read_func sctlr_el2
+define_sysreg_read_func sctlr_el3
+define_sysreg_read_func actlr_el1
+define_sysreg_read_func actlr_el2
+define_sysreg_read_func actlr_el3
+define_sysreg_read_func esr_el1
+define_sysreg_read_func esr_el2
+define_sysreg_read_func esr_el3
+define_sysreg_read_func afsr0_el1
+define_sysreg_read_func afsr0_el2
+define_sysreg_read_func afsr0_el3
+define_sysreg_read_func afsr1_el1
+define_sysreg_read_func afsr1_el2
+define_sysreg_read_func afsr1_el3
+define_sysreg_read_func far_el1
+define_sysreg_read_func far_el2
+define_sysreg_read_func far_el3
+define_sysreg_read_func mair_el1
+define_sysreg_read_func mair_el2
+define_sysreg_read_func mair_el3
+define_sysreg_read_func amair_el1
+define_sysreg_read_func amair_el2
+define_sysreg_read_func amair_el3
+define_sysreg_read_func rvbar_el1
+define_sysreg_read_func rvbar_el2
+define_sysreg_read_func rvbar_el3
+define_sysreg_read_func rmr_el1
+define_sysreg_read_func rmr_el2
+define_sysreg_read_func rmr_el3
+define_sysreg_read_func tcr_el1
+define_sysreg_read_func tcr_el2
+define_sysreg_read_func tcr_el3
+define_sysreg_read_func ttbr0_el1
+define_sysreg_read_func ttbr0_el2
+define_sysreg_read_func ttbr0_el3
+define_sysreg_read_func ttbr1_el1
+define_sysreg_read_func vttbr_el2
+define_sysreg_read_func cptr_el2
+define_sysreg_read_func cptr_el3
+define_sysreg_read_func cpacr_el1
+define_sysreg_read_func cntfrq_el0
+define_sysreg_read_func cnthp_ctl_el2
+define_sysreg_read_func cnthp_tval_el2
+define_sysreg_read_func cnthp_cval_el2
+define_sysreg_read_func cntps_ctl_el1
+define_sysreg_read_func cntps_tval_el1
+define_sysreg_read_func cntps_cval_el1
+define_sysreg_read_func cntp_ctl_el0
+define_sysreg_read_func cntp_tval_el0
+define_sysreg_read_func cntp_cval_el0
+define_sysreg_read_func cntpct_el0
+define_sysreg_read_func cnthctl_el2
+define_sysreg_read_func vtcr_el2
+define_sysreg_read_func tpidr_el3
+define_sysreg_read_func cntvoff_el2
+define_sysreg_read_func vpidr_el2
+define_sysreg_read_func vmpidr_el2
+define_sysreg_read_func isr_el1
+define_sysreg_read_func mdcr_el2
+define_sysreg_read_func mdcr_el3
+define_sysreg_read_func hstr_el2
+define_sysreg_read_func pmcr_el0

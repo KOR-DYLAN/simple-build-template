@@ -1,0 +1,83 @@
+#include <library/common/asm_macros_common.S>
+
+    .macro define_sysreg_write_func _name
+        .global write_\_name
+    func write_\_name
+        msr \_name, x0
+    endfunc write_\_name
+    .endm
+
+define_sysreg_write_func par_el1
+define_sysreg_write_func daif
+define_sysreg_write_func spsr_el1
+define_sysreg_write_func spsr_el2
+define_sysreg_write_func spsr_el3
+define_sysreg_write_func elr_el1
+define_sysreg_write_func elr_el2
+define_sysreg_write_func elr_el3
+define_sysreg_write_func dbgdtrtx_el0
+define_sysreg_write_func sp_el1
+define_sysreg_write_func sp_el2
+define_sysreg_write_func scr_el3
+define_sysreg_write_func hcr_el2
+define_sysreg_write_func vbar_el1
+define_sysreg_write_func vbar_el2
+define_sysreg_write_func vbar_el3
+define_sysreg_write_func sctlr_el1
+define_sysreg_write_func sctlr_el2
+define_sysreg_write_func sctlr_el3
+define_sysreg_write_func actlr_el1
+define_sysreg_write_func actlr_el2
+define_sysreg_write_func actlr_el3
+define_sysreg_write_func esr_el1
+define_sysreg_write_func esr_el2
+define_sysreg_write_func esr_el3
+define_sysreg_write_func afsr0_el1
+define_sysreg_write_func afsr0_el2
+define_sysreg_write_func afsr0_el3
+define_sysreg_write_func afsr1_el1
+define_sysreg_write_func afsr1_el2
+define_sysreg_write_func afsr1_el3
+define_sysreg_write_func far_el1
+define_sysreg_write_func far_el2
+define_sysreg_write_func far_el3
+define_sysreg_write_func mair_el1
+define_sysreg_write_func mair_el2
+define_sysreg_write_func mair_el3
+define_sysreg_write_func amair_el1
+define_sysreg_write_func amair_el2
+define_sysreg_write_func amair_el3
+define_sysreg_write_func rmr_el1
+define_sysreg_write_func rmr_el2
+define_sysreg_write_func rmr_el3
+define_sysreg_write_func tcr_el1
+define_sysreg_write_func tcr_el2
+define_sysreg_write_func tcr_el3
+define_sysreg_write_func ttbr0_el1
+define_sysreg_write_func ttbr0_el2
+define_sysreg_write_func ttbr0_el3
+define_sysreg_write_func ttbr1_el1
+define_sysreg_write_func vttbr_el2
+define_sysreg_write_func cptr_el2
+define_sysreg_write_func cptr_el3
+define_sysreg_write_func cpacr_el1
+define_sysreg_write_func cntfrq_el0
+define_sysreg_write_func cnthp_ctl_el2
+define_sysreg_write_func cnthp_tval_el2
+define_sysreg_write_func cnthp_cval_el2
+define_sysreg_write_func cntps_ctl_el1
+define_sysreg_write_func cntps_tval_el1
+define_sysreg_write_func cntps_cval_el1
+define_sysreg_write_func cntp_ctl_el0
+define_sysreg_write_func cntp_tval_el0
+define_sysreg_write_func cntp_cval_el0
+define_sysreg_write_func cnthctl_el2
+define_sysreg_write_func vtcr_el2
+define_sysreg_write_func tpidr_el3
+define_sysreg_write_func cntvoff_el2
+define_sysreg_write_func vpidr_el2
+define_sysreg_write_func vmpidr_el2
+define_sysreg_write_func mdcr_el2
+define_sysreg_write_func mdcr_el3
+define_sysreg_write_func hstr_el2
+define_sysreg_write_func pmcr_el0
