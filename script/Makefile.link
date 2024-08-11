@@ -19,3 +19,5 @@ all: $(TARGET)
 	$(Q)$(OBJCOPY) -O binary $@ $(basename $@).bin
 	@echo "[ASM]       $(basename $@).asm"
 	$(Q)$(OBJDUMP) -dx $@ > $(basename $@).asm
+	@echo "[CP]        '$(OUTPUT_BASE)/image.elf' from '$(basename $@).elf'"
+	$(Q)cp $@ $(OUTPUT_BASE)/image.elf
