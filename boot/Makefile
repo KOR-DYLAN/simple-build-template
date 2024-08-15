@@ -1,1 +1,1 @@
-boot-y	+=bl2
+boot-$(CONFIG_BOOT_BL2)	+=bl2

@@ -14,6 +14,7 @@ DIR_LISTS	+=driver
 DIR_LISTS	+=library
 DIR_LISTS	+=platform
 DIR_LISTS	+=boot
+DIR_LISTS	+=app
 
 # include .config
 -include $(BUILD_BASE)/.config

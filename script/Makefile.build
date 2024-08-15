@@ -13,14 +13,19 @@ ifeq ($(IS_ENTRY),TRUE)
     $(shell touch $(BUILD_BASE)/$(PROJECT_DIR)/objects.tmp.mk)
 endif
 
+ASFLAGS		+=$(asflags-y)
+CFLAGS		+=$(cflags-y)
+CPPFLAGS	+=$(cppflags-y)
+
 dir		:=$(addsuffix .dir,$(dir-y))
+app		:=$(addsuffix .app,$(app-y))
 boot	:=$(addsuffix .boot,$(boot-y))
 lib		:=$(addsuffix .lib,$(lib-y))
 obj		:=$(addprefix $(BUILD_BASE)/$(WORKING_DIR)/,$(obj-y))
 lds		:=$(addprefix $(BUILD_BASE)/$(WORKING_DIR)/,$(lds-y))
 dep		:=$(addsuffix .d,$(obj))
 dep		+=$(addsuffix .d,$(lds))
-recipe	:=$(dir) $(obj) $(lib) $(lds) $(boot)
+recipe	:=$(dir) $(obj) $(lib) $(lds) $(boot) $(app)
 $(foreach var,$(obj),$(shell echo "obj += $(var)" >> $(BUILD_BASE)/$(PROJECT_DIR)/objects.tmp.mk))
 $(foreach var,$(lds),$(shell echo "lds += $(var)" >> $(BUILD_BASE)/$(PROJECT_DIR)/objects.tmp.mk))
 
@@ -29,6 +34,12 @@ all: $(recipe)
 
 %.dir:
 	@$(MAKE) -f script/Makefile.build BUILD_TYPE=$(BUILD_TYPE) V=$(V) CROSS_COMPILE=$(CROSS_COMPILE) BUILD_BASE=$(BUILD_BASE) OUTPUT_BASE=$(OUTPUT_BASE) WORKING_DIR=$(WORKING_DIR)/$(basename $@) PROJECT_DIR=$(PROJECT_DIR)
+
+%.app:
+	@$(MAKE) -f script/Makefile.build BUILD_TYPE=$(BUILD_TYPE) V=$(V) CROSS_COMPILE=$(CROSS_COMPILE) BUILD_BASE=$(BUILD_BASE) OUTPUT_BASE=$(OUTPUT_BASE) WORKING_DIR=$(WORKING_DIR)/$(basename $@) PROJECT_DIR=$(WORKING_DIR)/$(basename $@) IS_ENTRY=TRUE
+	@sort $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)/objects.tmp.mk > $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)/objects.mk
+	@rm -f $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)/objects.tmp.mk
+	@$(MAKE) -f script/Makefile.link BUILD_TYPE=$(BUILD_TYPE) V=$(V) CROSS_COMPILE=$(CROSS_COMPILE) BUILD_BASE=$(BUILD_BASE) OUTPUT_BASE=$(OUTPUT_BASE) PROJECT_BASE=$(BUILD_BASE)/$(WORKING_DIR)/$(basename $@) TARGET=$(OUTPUT_BASE)/$(basename $@)/$(basename $@).elf
 
 %.boot:
 	@$(MAKE) -f script/Makefile.build BUILD_TYPE=$(BUILD_TYPE) V=$(V) CROSS_COMPILE=$(CROSS_COMPILE) BUILD_BASE=$(BUILD_BASE) OUTPUT_BASE=$(OUTPUT_BASE) WORKING_DIR=$(WORKING_DIR)/$(basename $@) PROJECT_DIR=$(WORKING_DIR)/$(basename $@) IS_ENTRY=TRUE
@@ -45,15 +56,15 @@ all: $(recipe)
 
 $(BUILD_BASE)/%.o: %.S
 	@echo "[AS]        $@"
-	$(Q)$(AS) -x assembler-with-cpp -march=$(CONFIG_SYSTEM_ARCH) -D__ASSEMBLER__ $(CFLAGS) -Iinclude/platform/$(CONFIG_PLATFORM) -Iinclude -I$(basename $<) -Wp,-MD,$@.d -MT $@ -MP -c $< -o $@
+	$(Q)$(AS) -x assembler-with-cpp $(ASFLAGS) -D__ASSEMBLER__ $(CFLAGS) -Iinclude -I$(basename $<) -Wp,-MD,$@.d -MT $@ -MP -c $< -o $@
 
 $(BUILD_BASE)/%.o: %.c
 	@echo "[CC]        $@"
-	$(Q)$(CC) -mtune=$(CONFIG_SYSTEM_CORE) -march=$(CONFIG_SYSTEM_ARCH) $(CFLAGS) -Iinclude/platform/$(CONFIG_PLATFORM) -Iinclude -I$(basename $<) -Wp,-MD,$@.d -MT $@ -MP -c $< -o $@
+	$(Q)$(CC) $(CFLAGS) -Iinclude -I$(basename $<) -Wp,-MD,$@.d -MT $@ -MP -c $< -o $@
 
 $(BUILD_BASE)/%.lds: %.lds.S
 	@echo "[PP]        $@"
-	$(Q)$(CPP) -P -x assembler-with-cpp -D__LINKER__ -Iinclude/platform/$(CONFIG_PLATFORM) -Iinclude -I$(basename $<) -Wp,-MD,$@.d -MT $@ -MP -o $@ $<
+	$(Q)$(CPP) -P -x assembler-with-cpp -D__LINKER__ $(CPPFLAGS) -Iinclude -I$(basename $<) -Wp,-MD,$@.d -MT $@ -MP -o $@ $<
 
 .PHONY: $(phony)
 

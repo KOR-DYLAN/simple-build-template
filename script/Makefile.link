@@ -1,11 +1,13 @@
 include $(BUILD_BASE)/.config
 include script/Makefile.toolchain
 include $(PROJECT_BASE)/objects.mk
-include $(BUILD_BASE)/link_lists.mk
+-include $(BUILD_BASE)/link_lists.mk
 
 ifneq ($(V),1)
     Q:=@
 endif
+
+LDFLAGS		+=$(ldflags-y)
 
 $(shell mkdir -p $(dir $(TARGET)))
 link_lib	:=$(addprefix -l,$(link_lib-y))
@@ -13,10 +15,15 @@ link_lib	:=$(addprefix -l,$(link_lib-y))
 all: $(TARGET)
 
 %.elf: $(obj) $(lds)
+ifeq ($(CONFIG_ENV_BAREMETAL),y)
 	@echo "[LD]        $@"
 	$(Q)$(LD) $(LDFLAGS) -Map=$(basename $@).map --script $(lds) -o $@ $(obj) -L$(OUTPUT_BASE)/libs --whole-archive $(link_lib) --no-whole-archive
 	@echo "[BIN]       $(basename $@).bin"
 	$(Q)$(OBJCOPY) -O binary $@ $(basename $@).bin
+else
+	@echo "[LD]        $@"
+	$(Q)$(CC) $(LDFLAGS) -Wl,-Map=$(basename $@).map -o $@ $(obj) -L$(OUTPUT_BASE)/libs $(link_lib)
+endif
 	@echo "[ASM]       $(basename $@).asm"
 	$(Q)$(OBJDUMP) -dx $@ > $(basename $@).asm
 	@echo "[CP]        '$(basename $@)' to '$(OUTPUT_BASE)/image.elf'"
