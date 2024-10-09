@@ -25,12 +25,6 @@ recipe	:=$(dir) $(obj) $(lib) $(lds) $(boot) $(app)
 $(foreach var,$(obj),$(shell echo "obj += $(var)" >> $(BUILD_BASE)/$(PROJECT_DIR)/objects.tmp.mk))
 $(foreach var,$(lds),$(shell echo "lds += $(var)" >> $(BUILD_BASE)/$(PROJECT_DIR)/objects.tmp.mk))
 
-ifeq ($(OS),Windows_NT)
-    EXE_EXT	:=exe
-else
-    EXE_EXT	:=elf
-endif
-
 phony+=all
 all: $(recipe)
 

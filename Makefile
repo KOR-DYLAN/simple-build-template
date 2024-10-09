@@ -18,6 +18,12 @@ DIR_LISTS		+=platform
 DIR_LISTS		+=boot
 DIR_LISTS		+=app
 
+ifeq ($(OS),Windows_NT)
+    EXE_EXT	:=exe
+else
+    EXE_EXT	:=elf
+endif
+
 # include .config
 -include $(SOURCE_DIR)/.config
 CROSS_COMPILE	:=$(CONFIG_CROSS_COMPILE)
@@ -30,6 +36,7 @@ export OUTPUT_BASE
 export BUILD_TYPE
 export Q
 export CROSS_COMPILE
+export EXE_EXT
 
 # Targets
 all: build
