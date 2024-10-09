@@ -24,3 +24,11 @@ endif
 	$(Q)$(OBJDUMP) -dx $@ > $(basename $@).asm
 	@echo "[CP]        '$(basename $@)' to '$(OUTPUT_BASE)/image.elf'"
 	$(Q)cp $@ $(OUTPUT_BASE)/image.elf
+
+%.exe: $(obj) $(lds)
+	@echo "[LD]        $@"
+	$(Q)$(CC) $(LDFLAGS) -Wl,-Map=$(basename $@).map -o $@ $(obj) -L$(OUTPUT_BASE)/libs $(link_lib)
+	@echo "[ASM]       $(basename $@).asm"
+	$(Q)$(OBJDUMP) -dx $@ > $(basename $@).asm
+	@echo "[CP]        '$(basename $@)' to '$(OUTPUT_BASE)/image.exe'"
+	$(Q)cp $@ $(OUTPUT_BASE)/image.exe
