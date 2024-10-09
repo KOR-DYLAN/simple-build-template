@@ -1,11 +1,7 @@
-include $(BUILD_BASE)/.config
+include .config
 include script/Makefile.toolchain
 include $(PROJECT_BASE)/objects.mk
 -include $(BUILD_BASE)/link_lists.mk
-
-ifneq ($(V),1)
-    Q:=@
-endif
 
 LDFLAGS		+=$(ldflags-y)
 

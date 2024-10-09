@@ -1,10 +1,6 @@
-include $(BUILD_BASE)/.config
+include .config
 include script/Makefile.toolchain
 include $(PROJECT_BASE)/objects.mk
-
-ifneq ($(V),1)
-    Q:=@
-endif
 
 all: $(TARGET)
 

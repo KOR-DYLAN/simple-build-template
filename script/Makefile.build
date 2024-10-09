@@ -1,10 +1,6 @@
-include $(BUILD_BASE)/.config
+include .config
 include script/Makefile.toolchain
 include $(WORKING_DIR)/Makefile
-
-ifneq ($(V),1)
-    Q:=@
-endif
 
 $(shell mkdir -p $(BUILD_BASE)/$(WORKING_DIR))
 $(shell mkdir -p $(OUTPUT_BASE)/libs)
@@ -33,25 +29,25 @@ phony+=all
 all: $(recipe)
 
 %.dir:
-	@$(MAKE) -f script/Makefile.build BUILD_TYPE=$(BUILD_TYPE) V=$(V) CROSS_COMPILE=$(CROSS_COMPILE) BUILD_BASE=$(BUILD_BASE) OUTPUT_BASE=$(OUTPUT_BASE) WORKING_DIR=$(WORKING_DIR)/$(basename $@) PROJECT_DIR=$(PROJECT_DIR)
+	$(Q)$(MAKE) -f script/Makefile.build WORKING_DIR=$(WORKING_DIR)/$(basename $@) PROJECT_DIR=$(PROJECT_DIR)
 
 %.app:
-	@$(MAKE) -f script/Makefile.build BUILD_TYPE=$(BUILD_TYPE) V=$(V) CROSS_COMPILE=$(CROSS_COMPILE) BUILD_BASE=$(BUILD_BASE) OUTPUT_BASE=$(OUTPUT_BASE) WORKING_DIR=$(WORKING_DIR)/$(basename $@) PROJECT_DIR=$(WORKING_DIR)/$(basename $@) IS_ENTRY=TRUE
+	$(Q)$(MAKE) -f script/Makefile.build WORKING_DIR=$(WORKING_DIR)/$(basename $@) PROJECT_DIR=$(WORKING_DIR)/$(basename $@) IS_ENTRY=TRUE
 	@sort $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)/objects.tmp.mk > $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)/objects.mk
 	@rm -f $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)/objects.tmp.mk
-	@$(MAKE) -f script/Makefile.link BUILD_TYPE=$(BUILD_TYPE) V=$(V) CROSS_COMPILE=$(CROSS_COMPILE) BUILD_BASE=$(BUILD_BASE) OUTPUT_BASE=$(OUTPUT_BASE) PROJECT_BASE=$(BUILD_BASE)/$(WORKING_DIR)/$(basename $@) TARGET=$(OUTPUT_BASE)/$(basename $@)/$(basename $@).elf
+	$(Q)$(MAKE) -f script/Makefile.link PROJECT_BASE=$(BUILD_BASE)/$(WORKING_DIR)/$(basename $@) TARGET=$(OUTPUT_BASE)/$(basename $@)/$(basename $@).elf
 
 %.boot:
-	@$(MAKE) -f script/Makefile.build BUILD_TYPE=$(BUILD_TYPE) V=$(V) CROSS_COMPILE=$(CROSS_COMPILE) BUILD_BASE=$(BUILD_BASE) OUTPUT_BASE=$(OUTPUT_BASE) WORKING_DIR=$(WORKING_DIR)/$(basename $@) PROJECT_DIR=$(WORKING_DIR)/$(basename $@) IS_ENTRY=TRUE
+	$(Q)$(MAKE) -f script/Makefile.build WORKING_DIR=$(WORKING_DIR)/$(basename $@) PROJECT_DIR=$(WORKING_DIR)/$(basename $@) IS_ENTRY=TRUE
 	@sort $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)/objects.tmp.mk > $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)/objects.mk
 	@rm -f $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)/objects.tmp.mk
-	@$(MAKE) -f script/Makefile.link BUILD_TYPE=$(BUILD_TYPE) V=$(V) CROSS_COMPILE=$(CROSS_COMPILE) BUILD_BASE=$(BUILD_BASE) OUTPUT_BASE=$(OUTPUT_BASE) PROJECT_BASE=$(BUILD_BASE)/$(WORKING_DIR)/$(basename $@) TARGET=$(OUTPUT_BASE)/$(basename $@)/$(basename $@).elf
+	$(Q)$(MAKE) -f script/Makefile.link PROJECT_BASE=$(BUILD_BASE)/$(WORKING_DIR)/$(basename $@) TARGET=$(OUTPUT_BASE)/$(basename $@)/$(basename $@).elf
 
 %.lib:
-	@$(MAKE) -f script/Makefile.build BUILD_TYPE=$(BUILD_TYPE) V=$(V) CROSS_COMPILE=$(CROSS_COMPILE) BUILD_BASE=$(BUILD_BASE) OUTPUT_BASE=$(OUTPUT_BASE) WORKING_DIR=$(WORKING_DIR)/$(basename $@) PROJECT_DIR=$(WORKING_DIR)/$(basename $@) IS_ENTRY=TRUE
+	$(Q)$(MAKE) -f script/Makefile.build WORKING_DIR=$(WORKING_DIR)/$(basename $@) PROJECT_DIR=$(WORKING_DIR)/$(basename $@) IS_ENTRY=TRUE
 	@sort $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)/objects.tmp.mk > $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)/objects.mk
 	@rm -f $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)/objects.tmp.mk
-	@$(MAKE) -f script/Makefile.archive BUILD_TYPE=$(BUILD_TYPE) V=$(V) CROSS_COMPILE=$(CROSS_COMPILE) BUILD_BASE=$(BUILD_BASE) OUTPUT_BASE=$(OUTPUT_BASE) PROJECT_BASE=$(BUILD_BASE)/$(WORKING_DIR)/$(basename $@) TARGET=$(OUTPUT_BASE)/libs/lib$(basename $@).a
+	$(Q)$(MAKE) -f script/Makefile.archive PROJECT_BASE=$(BUILD_BASE)/$(WORKING_DIR)/$(basename $@) TARGET=$(OUTPUT_BASE)/libs/lib$(basename $@).a
 	@echo "link_lib-y +=$(basename $@)" >> $(BUILD_BASE)/link_lists.mk
 
 $(BUILD_BASE)/%.o: %.S
