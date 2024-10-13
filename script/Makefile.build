@@ -29,22 +29,22 @@ phony+=all
 all: $(recipe)
 
 %.dir:
-	$(Q)$(MAKE) -f script/Makefile.build WORKING_DIR=$(WORKING_DIR)/$(basename $@) PROJECT_DIR=$(PROJECT_DIR)
+	$(Q)$(MAKE) -f script/Makefile.build WORKING_DIR=$(WORKING_DIR)/$(basename $@) PROJECT_DIR=$(PROJECT_DIR) -j $(NPROC)
 
 %.app:
-	$(Q)$(MAKE) -f script/Makefile.build WORKING_DIR=$(WORKING_DIR)/$(basename $@) PROJECT_DIR=$(WORKING_DIR)/$(basename $@) IS_ENTRY=TRUE
+	$(Q)$(MAKE) -f script/Makefile.build WORKING_DIR=$(WORKING_DIR)/$(basename $@) PROJECT_DIR=$(WORKING_DIR)/$(basename $@) IS_ENTRY=TRUE -j $(NPROC)
 	@sort $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)/objects.tmp.mk > $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)/objects.mk
 	@rm -f $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)/objects.tmp.mk
 	$(Q)$(MAKE) -f script/Makefile.link PROJECT_BASE=$(BUILD_BASE)/$(WORKING_DIR)/$(basename $@) TARGET=$(OUTPUT_BASE)/$(basename $@)/$(basename $@).$(EXE_EXT)
 
 %.boot:
-	$(Q)$(MAKE) -f script/Makefile.build WORKING_DIR=$(WORKING_DIR)/$(basename $@) PROJECT_DIR=$(WORKING_DIR)/$(basename $@) IS_ENTRY=TRUE
+	$(Q)$(MAKE) -f script/Makefile.build WORKING_DIR=$(WORKING_DIR)/$(basename $@) PROJECT_DIR=$(WORKING_DIR)/$(basename $@) IS_ENTRY=TRUE -j $(NPROC)
 	@sort $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)/objects.tmp.mk > $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)/objects.mk
 	@rm -f $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)/objects.tmp.mk
 	$(Q)$(MAKE) -f script/Makefile.link PROJECT_BASE=$(BUILD_BASE)/$(WORKING_DIR)/$(basename $@) TARGET=$(OUTPUT_BASE)/$(basename $@)/$(basename $@).elf
 
 %.lib:
-	$(Q)$(MAKE) -f script/Makefile.build WORKING_DIR=$(WORKING_DIR)/$(basename $@) PROJECT_DIR=$(WORKING_DIR)/$(basename $@) IS_ENTRY=TRUE
+	$(Q)$(MAKE) -f script/Makefile.build WORKING_DIR=$(WORKING_DIR)/$(basename $@) PROJECT_DIR=$(WORKING_DIR)/$(basename $@) IS_ENTRY=TRUE -j $(NPROC)
 	@sort $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)/objects.tmp.mk > $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)/objects.mk
 	@rm -f $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)/objects.tmp.mk
 	$(Q)$(MAKE) -f script/Makefile.archive PROJECT_BASE=$(BUILD_BASE)/$(WORKING_DIR)/$(basename $@) TARGET=$(OUTPUT_BASE)/libs/lib$(basename $@).a

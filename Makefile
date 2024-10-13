@@ -5,6 +5,7 @@ BUILD_BASE		?=build
 OUTPUT_BASE		?=output
 MAKEFLAGS 		+=--no-print-directory
 V				?=0
+NPROC			?=$(shell nproc)
 ifneq ($(V),1)
     Q:=@
 endif
@@ -57,6 +58,7 @@ export MULTIDIR
 export BUILTINS
 export COMPILER_SPECIFIC_CFLAGS
 export COMPILER_SPECIFIC_LDFLAGS
+export NPROC
 
 # Targets
 all: build
