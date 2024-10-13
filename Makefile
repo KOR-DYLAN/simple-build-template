@@ -20,8 +20,10 @@ DIR_LISTS		+=app
 
 ifeq ($(OS),Windows_NT)
     EXE_EXT	:=exe
+    NATIVE_SOURCE_DIR:=$(shell cygpath -m $(SOURCE_DIR))
 else
     EXE_EXT	:=elf
+    NATIVE_SOURCE_DIR:=$(SOURCE_DIR)
 endif
 
 # include .config
@@ -83,7 +85,7 @@ ifeq (,$(wildcard $(SOURCE_DIR)/.config))
 	$(error can not found '$(SOURCE_DIR)/.config'...)
 endif
 	@echo "generating 'compile_commands.json'..."
-	@$(MAKE) --always-make --dry-run | grep -wE 'gcc|g\+\+|armclang' | grep -w '\-c' | jq -nR '[inputs|{directory:"$(SOURCE_DIR)", command:., file: (match("[^ ]+\\.(s|S|c|cpp)\\b").string)}]' > $(BUILD_BASE)/compile_commands.json
+	@$(MAKE) --always-make --dry-run | grep -wE 'gcc|g\+\+|clang|armclang' | grep -w '\-c' | jq -nR '[inputs|{directory:"$(NATIVE_SOURCE_DIR)", command:., file: (match("[^ ]+\\.(s|S|c|cpp)\\b").string)}]' > $(BUILD_BASE)/compile_commands.json
 	@echo "done!"
 
 phony+=run
