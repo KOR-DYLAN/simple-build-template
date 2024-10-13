@@ -6,9 +6,7 @@ include $(PROJECT_BASE)/objects.mk
 LDFLAGS		+=$(ldflags-y)
 
 $(shell mkdir -p $(dir $(TARGET)))
-link_lib	:=-Wl,--whole-archive
-link_lib	+=$(addprefix -l,$(link_lib-y))
-link_lib	+=-Wl,--no-whole-archive
+link_lib	:=$(addprefix -l,$(link_lib-y))
 
 ifneq ($(lds),)
     LDFLAGS	+=-Wl,--script $(lds)
@@ -18,7 +16,7 @@ all: $(TARGET)
 
 %.elf: $(obj) $(lds)
 	@echo "[LD]        $@"
-	$(Q)$(LD) $(LDFLAGS) -Wl,-Map=$(basename $@).map -o $@ $(obj) $(COMPILER_SPECIFIC_LDFLAGS) -L$(OUTPUT_BASE)/libs $(link_lib)
+	$(Q)$(LD) $(LDFLAGS) -Wl,-Map=$(basename $@).map -o $@ $(obj) $(COMPILER_SPECIFIC_LDFLAGS) -L$(OUTPUT_BASE)/libs -Wl,--whole-archive $(link_lib) -Wl,--no-whole-archive
 ifeq ($(CONFIG_ENV_BAREMETAL),y)
 	@echo "[BIN]       $(basename $@).bin"
 	$(Q)$(OBJCOPY) -O binary $@ $(basename $@).bin
@@ -30,7 +28,7 @@ endif
 
 %.exe: $(obj) $(lds)
 	@echo "[LD]        $@"
-	$(Q)$(CC) $(LDFLAGS) -Wl,-Map=$(basename $@).map -o $@ $(obj) -L$(OUTPUT_BASE)/libs $(link_lib)
+	$(Q)$(CC) $(LDFLAGS) -Wl,-Map:$(basename $@).map -o $@ $(obj) -L$(OUTPUT_BASE)/libs $(link_lib)
 	@echo "[ASM]       $(basename $@).asm"
 	$(Q)$(OBJDUMP) -dx $@ > $(basename $@).asm
 	@echo "[CP]        '$(basename $@)' to '$(OUTPUT_BASE)/image.exe'"
