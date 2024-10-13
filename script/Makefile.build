@@ -1,5 +1,5 @@
 include .config
-include script/Makefile.toolchain
+include script/Makefile.toolchain.$(TOOLCHAIN)
 include $(WORKING_DIR)/Makefile
 
 $(shell mkdir -p $(BUILD_BASE)/$(WORKING_DIR))

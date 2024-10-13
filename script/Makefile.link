@@ -1,24 +1,27 @@
 include .config
-include script/Makefile.toolchain
+include script/Makefile.toolchain.$(TOOLCHAIN)
 include $(PROJECT_BASE)/objects.mk
 -include $(BUILD_BASE)/link_lists.mk
 
 LDFLAGS		+=$(ldflags-y)
 
 $(shell mkdir -p $(dir $(TARGET)))
-link_lib	:=$(addprefix -l,$(link_lib-y))
+link_lib	:=-Wl,--whole-archive
+link_lib	+=$(addprefix -l,$(link_lib-y))
+link_lib	+=-Wl,--no-whole-archive
+
+ifneq ($(lds),)
+    LDFLAGS	+=-Wl,--script $(lds)
+endif
 
 all: $(TARGET)
 
 %.elf: $(obj) $(lds)
-ifeq ($(CONFIG_ENV_BAREMETAL),y)
 	@echo "[LD]        $@"
-	$(Q)$(LD) $(LDFLAGS) -Map=$(basename $@).map --script $(lds) -o $@ $(obj) -L$(OUTPUT_BASE)/libs --whole-archive $(link_lib) --no-whole-archive
+	$(Q)$(LD) $(LDFLAGS) -Wl,-Map=$(basename $@).map -o $@ $(obj) $(COMPILER_SPECIFIC_LDFLAGS) -L$(OUTPUT_BASE)/libs $(link_lib)
+ifeq ($(CONFIG_ENV_BAREMETAL),y)
 	@echo "[BIN]       $(basename $@).bin"
 	$(Q)$(OBJCOPY) -O binary $@ $(basename $@).bin
-else
-	@echo "[LD]        $@"
-	$(Q)$(CC) $(LDFLAGS) -Wl,-Map=$(basename $@).map -o $@ $(obj) -L$(OUTPUT_BASE)/libs $(link_lib)
 endif
 	@echo "[ASM]       $(basename $@).asm"
 	$(Q)$(OBJDUMP) -dx $@ > $(basename $@).asm

@@ -26,7 +26,19 @@ endif
 
 # include .config
 -include $(SOURCE_DIR)/.config
-CROSS_COMPILE	:=$(CONFIG_CROSS_COMPILE)
+CROSS_COMPILE	:=$(CONFIG_CROSS_COMPILE)-
+ifeq ($(CONFIG_TOOLCHAIN),llvm)
+    TOOLCHAIN	:=$(CONFIG_TOOLCHAIN)
+    ifneq ($(CONFIG_CROSS_COMPILE),)
+        SYSROOT		:=$(shell $(CONFIG_CROSS_COMPILE)-gcc -print-sysroot)
+        MULTIDIR	:=$(shell $(CONFIG_CROSS_COMPILE)-gcc -print-multi-directory)
+        BUILTINS	:=$(shell $(CONFIG_CROSS_COMPILE)-gcc -print-libgcc-file-name)
+        COMPILER_SPECIFIC_CFLAGS	:=--target=$(CONFIG_CROSS_COMPILE) --sysroot=$(SYSROOT)
+        COMPILER_SPECIFIC_LDFLAGS	:=-L$(SYSROOT)/lib/$(MULTIDIR)
+    endif
+else
+    TOOLCHAIN	:=gnu
+endif
 
 # export gloabal variable
 export TOPDIR
@@ -37,6 +49,12 @@ export BUILD_TYPE
 export Q
 export CROSS_COMPILE
 export EXE_EXT
+export TOOLCHAIN
+export SYSROOT
+export MULTIDIR
+export BUILTINS
+export COMPILER_SPECIFIC_CFLAGS
+export COMPILER_SPECIFIC_LDFLAGS
 
 # Targets
 all: build
@@ -65,15 +83,11 @@ ifeq (,$(wildcard $(SOURCE_DIR)/.config))
 	$(error can not found '$(SOURCE_DIR)/.config'...)
 endif
 	@echo "generating 'compile_commands.json'..."
-	@$(MAKE) --always-make --dry-run | grep -wE 'gcc|g\+\+|armclang' | grep -w '\-c' | jq -nR '[inputs|{directory:".", command:., file: (match("[^ ]+\\.(s|S|c|cpp)\\b").string)}]' > $(BUILD_BASE)/compile_commands.json
+	@$(MAKE) --always-make --dry-run | grep -wE 'gcc|g\+\+|armclang' | grep -w '\-c' | jq -nR '[inputs|{directory:"$(SOURCE_DIR)", command:., file: (match("[^ ]+\\.(s|S|c|cpp)\\b").string)}]' > $(BUILD_BASE)/compile_commands.json
 	@echo "done!"
 
 phony+=run
 run: build
-	$(CONFIG_QEMU) -M $(CONFIG_QEMU_MACHINE),virtualization=$(CONFIG_QEMU_VIRTUALIZATION),secure=$(CONFIG_QEMU_SECURE) -cpu $(CONFIG_QEMU_CPU) -smp $(CONFIG_QEMU_SMP) -m $(CONFIG_QEMU_RAM) -kernel $(OUTPUT_BASE)/image.elf $(CONFIG_QEMU_FLAGS)
-
-phony+=debug
-debug: build
-	$(CONFIG_QEMU) -M $(CONFIG_QEMU_MACHINE),virtualization=$(CONFIG_QEMU_VIRTUALIZATION),secure=$(CONFIG_QEMU_SECURE) -cpu $(CONFIG_QEMU_CPU) -smp $(CONFIG_QEMU_SMP) -m $(CONFIG_QEMU_RAM) -kernel $(OUTPUT_BASE)/image.elf $(CONFIG_QEMU_FLAGS) -S -s
+	./output/image.$(EXE_EXT)
 
 .PHONY: $(phony)
