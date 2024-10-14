@@ -29,13 +29,15 @@ endif
 -include $(SOURCE_DIR)/.config
 
 # toolchain basic config
-CROSS_COMPILE	:=$(CONFIG_CROSS_COMPILE)-
+ifneq ($(CONFIG_CROSS_COMPILE),)
+    CROSS_COMPILE	:=$(CONFIG_CROSS_COMPILE)-
+endif
 ifeq ($(CONFIG_TOOLCHAIN),llvm)
-    TOOLCHAIN	:=$(CONFIG_TOOLCHAIN)
+    TOOLCHAIN		:=$(CONFIG_TOOLCHAIN)
 else ifeq ($(CONFIG_TOOLCHAIN),armclang)
-    TOOLCHAIN	:=$(CONFIG_TOOLCHAIN)
+    TOOLCHAIN		:=$(CONFIG_TOOLCHAIN)
 else
-    TOOLCHAIN	        :=gnu
+    TOOLCHAIN		:=gnu
 endif
 
 # export gloabal variable
@@ -63,7 +65,7 @@ ifeq (,$(wildcard $(SOURCE_DIR)/.config))
 	$(error can not found '$(SOURCE_DIR)/.config'...)
 endif
 	@rm -f $(BUILD_BASE)/link_lists.mk
-	$(Q)$(foreach it, $(DIR_LISTS), $(MAKE) -f script/Makefile.build WORKING_DIR=$(it) IS_ENTRY=FALSE;)
+	$(Q)$(foreach it, $(DIR_LISTS), $(MAKE) -f script/Makefile.build WORKING_DIR=$(it);)
 
 phony+=clean
 clean:
