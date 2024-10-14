@@ -1,1 +1,0 @@
-obj-y	+=spi-nor-core.o
