@@ -1,0 +1,1 @@
+lib-$(CONFIG_PLATFORM_QEMU_VIRT_AARCH64)	+=virt_aarch64

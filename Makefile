@@ -20,27 +20,22 @@ DIR_LISTS		+=boot
 DIR_LISTS		+=app
 
 ifeq ($(OS),Windows_NT)
-    EXE_EXT	:=exe
     NATIVE_SOURCE_DIR:=$(shell cygpath -m $(SOURCE_DIR))
 else
-    EXE_EXT	:=elf
     NATIVE_SOURCE_DIR:=$(SOURCE_DIR)
 endif
 
 # include .config
 -include $(SOURCE_DIR)/.config
+
+# toolchain basic config
 CROSS_COMPILE	:=$(CONFIG_CROSS_COMPILE)-
 ifeq ($(CONFIG_TOOLCHAIN),llvm)
     TOOLCHAIN	:=$(CONFIG_TOOLCHAIN)
-    ifneq ($(CONFIG_CROSS_COMPILE),)
-        SYSROOT		:=$(shell $(CONFIG_CROSS_COMPILE)-gcc -print-sysroot)
-        MULTIDIR	:=$(shell $(CONFIG_CROSS_COMPILE)-gcc -print-multi-directory)
-        BUILTINS	:=$(shell $(CONFIG_CROSS_COMPILE)-gcc -print-libgcc-file-name)
-        COMPILER_SPECIFIC_CFLAGS	:=--target=$(CONFIG_CROSS_COMPILE) --sysroot=$(SYSROOT)
-        COMPILER_SPECIFIC_LDFLAGS	:=-L$(SYSROOT)/lib/$(MULTIDIR)
-    endif
+else ifeq ($(CONFIG_TOOLCHAIN),armclang)
+    TOOLCHAIN	:=$(CONFIG_TOOLCHAIN)
 else
-    TOOLCHAIN	:=gnu
+    TOOLCHAIN	        :=gnu
 endif
 
 # export gloabal variable
@@ -51,13 +46,7 @@ export OUTPUT_BASE
 export BUILD_TYPE
 export Q
 export CROSS_COMPILE
-export EXE_EXT
 export TOOLCHAIN
-export SYSROOT
-export MULTIDIR
-export BUILTINS
-export COMPILER_SPECIFIC_CFLAGS
-export COMPILER_SPECIFIC_LDFLAGS
 export NPROC
 
 # Targets

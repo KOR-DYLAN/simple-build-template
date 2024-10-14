@@ -4,10 +4,6 @@ include $(WORKING_DIR)/Makefile
 
 $(shell mkdir -p $(BUILD_BASE)/$(WORKING_DIR))
 $(shell mkdir -p $(OUTPUT_BASE)/libs)
-ifeq ($(IS_ENTRY),TRUE)
-    $(shell rm -f $(BUILD_BASE)/$(PROJECT_DIR)/objects.tmp.mk)
-    $(shell touch $(BUILD_BASE)/$(PROJECT_DIR)/objects.tmp.mk)
-endif
 
 ASFLAGS		+=$(asflags-y)
 CFLAGS		+=$(cflags-y)
@@ -32,19 +28,28 @@ all: $(recipe)
 	$(Q)$(MAKE) -f script/Makefile.build WORKING_DIR=$(WORKING_DIR)/$(basename $@) PROJECT_DIR=$(PROJECT_DIR) -j $(NPROC)
 
 %.app:
-	$(Q)$(MAKE) -f script/Makefile.build WORKING_DIR=$(WORKING_DIR)/$(basename $@) PROJECT_DIR=$(WORKING_DIR)/$(basename $@) IS_ENTRY=TRUE -j $(NPROC)
+	@rm -f $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)/objects.tmp.mk
+	@mkdir -p $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)
+	@touch $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)/objects.tmp.mk
+	$(Q)$(MAKE) -f script/Makefile.build WORKING_DIR=$(WORKING_DIR)/$(basename $@) PROJECT_DIR=$(WORKING_DIR)/$(basename $@) -j $(NPROC)
 	@sort $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)/objects.tmp.mk > $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)/objects.mk
 	@rm -f $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)/objects.tmp.mk
 	$(Q)$(MAKE) -f script/Makefile.link PROJECT_BASE=$(BUILD_BASE)/$(WORKING_DIR)/$(basename $@) TARGET=$(OUTPUT_BASE)/$(basename $@)/$(basename $@).$(EXE_EXT)
 
 %.boot:
-	$(Q)$(MAKE) -f script/Makefile.build WORKING_DIR=$(WORKING_DIR)/$(basename $@) PROJECT_DIR=$(WORKING_DIR)/$(basename $@) IS_ENTRY=TRUE -j $(NPROC)
+	@rm -f $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)/objects.tmp.mk
+	@mkdir -p $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)
+	@touch $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)/objects.tmp.mk
+	$(Q)$(MAKE) -f script/Makefile.build WORKING_DIR=$(WORKING_DIR)/$(basename $@) PROJECT_DIR=$(WORKING_DIR)/$(basename $@) -j $(NPROC)
 	@sort $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)/objects.tmp.mk > $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)/objects.mk
 	@rm -f $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)/objects.tmp.mk
-	$(Q)$(MAKE) -f script/Makefile.link PROJECT_BASE=$(BUILD_BASE)/$(WORKING_DIR)/$(basename $@) TARGET=$(OUTPUT_BASE)/$(basename $@)/$(basename $@).elf
+	$(Q)$(MAKE) -f script/Makefile.link PROJECT_BASE=$(BUILD_BASE)/$(WORKING_DIR)/$(basename $@) TARGET=$(OUTPUT_BASE)/$(basename $@)/$(basename $@).$(EXE_EXT)
 
 %.lib:
-	$(Q)$(MAKE) -f script/Makefile.build WORKING_DIR=$(WORKING_DIR)/$(basename $@) PROJECT_DIR=$(WORKING_DIR)/$(basename $@) IS_ENTRY=TRUE -j $(NPROC)
+	@rm -f $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)/objects.tmp.mk
+	@mkdir -p $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)
+	@touch $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)/objects.tmp.mk
+	$(Q)$(MAKE) -f script/Makefile.build WORKING_DIR=$(WORKING_DIR)/$(basename $@) PROJECT_DIR=$(WORKING_DIR)/$(basename $@) -j $(NPROC)
 	@sort $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)/objects.tmp.mk > $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)/objects.mk
 	@rm -f $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)/objects.tmp.mk
 	$(Q)$(MAKE) -f script/Makefile.archive PROJECT_BASE=$(BUILD_BASE)/$(WORKING_DIR)/$(basename $@) TARGET=$(OUTPUT_BASE)/libs/lib$(basename $@).a
@@ -61,6 +66,10 @@ $(BUILD_BASE)/%.o: %.c
 $(BUILD_BASE)/%.lds: %.lds.S
 	@echo "[PP]        $@"
 	$(Q)$(CPP) -P -x assembler-with-cpp -D__LINKER__ $(CPPFLAGS) -Iinclude -I$(basename $<) -Wp,-MD,$@.d -MT $@ -MP -o $@ $<
+
+$(BUILD_BASE)/%.scat: %.scat.S
+	@echo "[PP]        $@"
+	$(Q)$(CPP) -E -xc -D__LINKER__ $(CPPFLAGS) -Iinclude -I$(basename $<) -Wp,-MD,$@.d -MT $@ -MP $< -o $@
 
 .PHONY: $(phony)
 

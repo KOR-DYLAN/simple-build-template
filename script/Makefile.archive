@@ -2,8 +2,14 @@ include .config
 include script/Makefile.toolchain.$(TOOLCHAIN)
 include $(PROJECT_BASE)/objects.mk
 
+ifeq ($(TOOLCHAIN),armclang)
+    ARFLAGS	:=-cr
+else
+    ARFLAGS	:=cr
+endif
+
 all: $(TARGET)
 
 %.a: $(obj)
 	@echo "[AR]        $@"
-	$(Q)$(AR) cr $@ $(obj)
+	$(Q)$(AR) $(ARFLAGS) $@ $(obj)

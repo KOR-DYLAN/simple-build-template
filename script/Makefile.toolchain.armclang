@@ -1,23 +1,34 @@
 # Set Basic Env
-ifeq ($(CONFIG_BAREMETAL),y)
-    LINKER_SCRIPT	:=y
-    EXE_EXT			:=elf
+ifeq ($(CONFIG_AARCH64),y)
+    COMPILER_SPECIFIC_CFLAGS    :=--target=aarch64-arm-none-eabi
+else ifeq ($(CONFIG_AARCH32),y)
+    COMPILER_SPECIFIC_CFLAGS    :=--target=arm-arm-none-eabi
 else
-    ifeq ($(OS),Windows_NT)
-        EXE_EXT		:=exe
-    else
-        EXE_EXT		:=elf
-    endif
+    $(error "no target architecture given...")
 endif
 
+ifneq ($(CONFIG_ARMLMD_LICENSE_FILE),)
+    export ARMLMD_LICENSE_FILE=$(CONFIG_ARMLMD_LICENSE_FILE)
+endif
+SCATTER_LOADER	:=y
+EXE_EXT			:=axf
+
 # Set Toolchain
-AS      :=$(CROSS_COMPILE)gcc
-CC      :=$(CROSS_COMPILE)gcc
-AR      :=$(CROSS_COMPILE)ar
-LD      :=$(CROSS_COMPILE)gcc
-CPP     :=$(CROSS_COMPILE)cpp
-OBJCOPY :=$(CROSS_COMPILE)objcopy
-OBJDUMP :=$(CROSS_COMPILE)objdump
+ifneq ($(CONFIG_ARMCLANG_ROOT_PATH),)
+    AS      :=$(CONFIG_ARMCLANG_ROOT_PATH)/bin/armclang $(COMPILER_SPECIFIC_CFLAGS)
+    CC      :=$(CONFIG_ARMCLANG_ROOT_PATH)/bin/armclang $(COMPILER_SPECIFIC_CFLAGS)
+    AR      :=$(CONFIG_ARMCLANG_ROOT_PATH)/bin/armar
+    LD      :=$(CONFIG_ARMCLANG_ROOT_PATH)/bin/armlink
+    CPP     :=$(CONFIG_ARMCLANG_ROOT_PATH)/bin/armclang $(COMPILER_SPECIFIC_CFLAGS)
+    FROMELF :=$(CONFIG_ARMCLANG_ROOT_PATH)/bin/fromelf
+else
+    AS      :=armclang $(COMPILER_SPECIFIC_CFLAGS)
+    CC      :=armclang $(COMPILER_SPECIFIC_CFLAGS)
+    AR      :=armar
+    LD      :=armlink
+    CPP     :=armclang $(COMPILER_SPECIFIC_CFLAGS)
+    FROMELF :=fromelf
+endif
 
 # Common ASM/C Compiler Options
 cflags-$(CONFIG_BAREMETAL)		+=-fno-common
@@ -34,7 +45,7 @@ cflags-$(CONFIG_NO_BUILTIN)			+=-fno-builtin
 cflags-$(CONFIG_NOSTDINC)			+=-nostdinc
 
 # Do not use the standard system startup files or libraries when linking.
-ldflags-$(CONFIG_NOSTDLIB)			+=-nostdlib
+# ldflags-$(CONFIG_NOSTDLIB)			+=-nostdlib
 
 # no floating-point or Advanced SIMD registers
 cflags-$(CONFIG_GENERAL_REGS_ONLY)	+=-mgeneral-regs-only
@@ -44,13 +55,13 @@ cflags-$(CONFIG_STRICT_ALIGN)		+=-mstrict-align
 
 # Baremetal Environment
 cflags-$(CONFIG_BAREMETAL)		+=-ffreestanding
-ldflags-$(CONFIG_BAREMETAL)		+=-z noexecstack
-ldflags-$(CONFIG_BAREMETAL)		+=-Wl,--fatal-warnings
-ldflags-$(CONFIG_BAREMETAL)		+=-Wl,--gc-sections
-ldflags-$(CONFIG_BAREMETAL)		+=-Wl,--sort-section=alignment
-ldflags-$(CONFIG_BAREMETAL)		+=-Wl,-z,common-page-size=4096
-ldflags-$(CONFIG_BAREMETAL)		+=-Wl,-z,max-page-size=4096
-ldflags-$(CONFIG_BAREMETAL)		+=-Wl,--build-id=none
+#ldflags-$(CONFIG_BAREMETAL)		+=-z noexecstack
+# ldflags-$(CONFIG_BAREMETAL)		+=--diag_error=warning
+ldflags-$(CONFIG_BAREMETAL)		+=--remove --info=unused,unusedsymbols
+#ldflags-$(CONFIG_BAREMETAL)		+=-Wl,--sort-section=alignment
+#ldflags-$(CONFIG_BAREMETAL)		+=-Wl,-z,common-page-size=4096
+#ldflags-$(CONFIG_BAREMETAL)		+=-Wl,-z,max-page-size=4096
+#ldflags-$(CONFIG_BAREMETAL)		+=-Wl,--build-id=none
 
 # Determine the language standard.
 ifneq ($(CONFIG_STD),)
@@ -72,10 +83,10 @@ endif
 # Build options according to build type
 ifeq ($(BUILD_TYPE),debug)
     CFLAGS	+=-O0 -g -DDEBUG=1
-    LDFLAGS	+=-O0
+    LDFLAGS	+=--lto_level=O0
 else ifeq ($(BUILD_TYPE),release)
     CFLAGS	+=-O2 -DDEBUG=0
-    LDFLAGS	+=-O2
+    LDFLAGS	+=--lto_level=O2
 else
     $(error Unknown BUILD_TYPE...)
 endif

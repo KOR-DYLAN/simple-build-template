@@ -1,1 +1,1 @@
-lib-$(CONFIG_PLATFORM_QEMU_VIRT)	+=qemu-virt
+dir-$(CONFIG_PLATFORM_QEMU)	+=qemu

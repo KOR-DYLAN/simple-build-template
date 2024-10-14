@@ -3,21 +3,28 @@ include script/Makefile.toolchain.$(TOOLCHAIN)
 include $(PROJECT_BASE)/objects.mk
 -include $(BUILD_BASE)/link_lists.mk
 
-LDFLAGS		+=$(ldflags-y)
+LDFLAGS		:=$(ldflags-y)
+ifeq ($(CONFIG_BAREMETAL),y)
+    ifeq ($(TOOLCHAIN),armclang)
+        LDFLAGS	+=--entry=image_entrypoint
+        LDFLAGS	+=--scatter=$(lds)
+        LDFLAGS	+=--userlibpath=$(OUTPUT_BASE)/libs
+        LDFLAGS	+=$(addprefix --library=,$(link_lib-y))
+    else
+        LDFLAGS	+=-Wl,--script $(lds)
+        link_lib	:=$(addprefix -l,$(link_lib-y))
+    endif
+endif
 
 $(shell mkdir -p $(dir $(TARGET)))
 link_lib	:=$(addprefix -l,$(link_lib-y))
-
-ifneq ($(lds),)
-    LDFLAGS	+=-Wl,--script $(lds)
-endif
 
 all: $(TARGET)
 
 %.elf: $(obj) $(lds)
 	@echo "[LD]        $@"
 	$(Q)$(LD) $(LDFLAGS) -Wl,-Map=$(basename $@).map -o $@ $(obj) $(COMPILER_SPECIFIC_LDFLAGS) -L$(OUTPUT_BASE)/libs -Wl,--whole-archive $(link_lib) -Wl,--no-whole-archive
-ifeq ($(CONFIG_ENV_BAREMETAL),y)
+ifeq ($(CONFIG_BAREMETAL),y)
 	@echo "[BIN]       $(basename $@).bin"
 	$(Q)$(OBJCOPY) -O binary $@ $(basename $@).bin
 endif
@@ -25,6 +32,16 @@ endif
 	$(Q)$(OBJDUMP) -dx $@ > $(basename $@).asm
 	@echo "[CP]        '$(basename $@)' to '$(OUTPUT_BASE)/image.elf'"
 	$(Q)cp $@ $(OUTPUT_BASE)/image.elf
+
+%.axf: $(obj) $(lds)
+	@echo "[LD]        $@"
+	$(Q)$(LD) -o $@ --map --list=$(basename $@).map $(COMPILER_SPECIFIC_LDFLAGS) $(LDFLAGS) $(obj)
+	@echo "[BIN]       $(basename $@).bin"
+	$(Q)$(FROMELF) $@ --bin --output  $(basename $@).bin
+	@echo "[ASM]       $(basename $@).asm"
+	$(Q)$(FROMELF) -c $@ >  $(basename $@).asm
+	@echo "[CP]        '$(basename $@)' to '$(OUTPUT_BASE)/image.axf'"
+	$(Q)cp $@ $(OUTPUT_BASE)/image.axf
 
 %.exe: $(obj) $(lds)
 	@echo "[LD]        $@"

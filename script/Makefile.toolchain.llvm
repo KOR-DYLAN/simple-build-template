@@ -1,3 +1,23 @@
+# Set Basic Env
+ifeq ($(CONFIG_BAREMETAL),y)
+    LINKER_SCRIPT	:=y
+    EXE_EXT			:=elf
+else
+    ifeq ($(OS),Windows_NT)
+        EXE_EXT		:=exe
+    else
+        EXE_EXT		:=elf
+    endif
+endif
+
+ifneq ($(CONFIG_CROSS_COMPILE),)
+    SYSROOT		:=$(shell $(CONFIG_CROSS_COMPILE)-gcc -print-sysroot)
+    MULTIDIR	:=$(shell $(CONFIG_CROSS_COMPILE)-gcc -print-multi-directory)
+    BUILTINS	:=$(shell $(CONFIG_CROSS_COMPILE)-gcc -print-libgcc-file-name)
+    COMPILER_SPECIFIC_CFLAGS	:=--target=$(CONFIG_CROSS_COMPILE) --sysroot=$(SYSROOT)
+    COMPILER_SPECIFIC_LDFLAGS	:=-L$(SYSROOT)/lib/$(MULTIDIR)
+endif
+
 # Set Toolchain
 AS      :=clang $(COMPILER_SPECIFIC_CFLAGS)
 CC      :=clang $(COMPILER_SPECIFIC_CFLAGS)
@@ -8,9 +28,9 @@ OBJCOPY :=llvm-objcopy
 OBJDUMP :=llvm-objdump
 
 # Common ASM/C Compiler Options
-cflags-$(CONFIG_ENV_BAREMETAL)		+=-fno-common
-cflags-$(CONFIG_ENV_BAREMETAL)		+=-ffunction-sections
-cflags-$(CONFIG_ENV_BAREMETAL)		+=-fdata-sections
+cflags-$(CONFIG_BAREMETAL)		+=-fno-common
+cflags-$(CONFIG_BAREMETAL)		+=-ffunction-sections
+cflags-$(CONFIG_BAREMETAL)		+=-fdata-sections
 
 # Do not use jump tables for switch statements even where it would be more efficient than other code generation strategies.
 cflags-$(CONFIG_NO_JUMP_TABLES)		+=-fno-jump-tables
@@ -31,14 +51,14 @@ cflags-$(CONFIG_GENERAL_REGS_ONLY)	+=-mgeneral-regs-only
 cflags-$(CONFIG_STRICT_ALIGN)		+=-mstrict-align
 
 # Baremetal Environment
-cflags-$(CONFIG_ENV_BAREMETAL)		+=-ffreestanding
-ldflags-$(CONFIG_ENV_BAREMETAL)		+=-z noexecstack
-ldflags-$(CONFIG_ENV_BAREMETAL)		+=-Wl,--fatal-warnings
-ldflags-$(CONFIG_ENV_BAREMETAL)		+=-Wl,--gc-sections
-ldflags-$(CONFIG_ENV_BAREMETAL)		+=-Wl,--sort-section=alignment
-ldflags-$(CONFIG_ENV_BAREMETAL)		+=-Wl,-z,common-page-size=4096
-ldflags-$(CONFIG_ENV_BAREMETAL)		+=-Wl,-z,max-page-size=4096
-ldflags-$(CONFIG_ENV_BAREMETAL)		+=-Wl,--build-id=none
+cflags-$(CONFIG_BAREMETAL)		+=-ffreestanding
+ldflags-$(CONFIG_BAREMETAL)		+=-z noexecstack
+ldflags-$(CONFIG_BAREMETAL)		+=-Wl,--fatal-warnings
+ldflags-$(CONFIG_BAREMETAL)		+=-Wl,--gc-sections
+ldflags-$(CONFIG_BAREMETAL)		+=-Wl,--sort-section=alignment
+ldflags-$(CONFIG_BAREMETAL)		+=-Wl,-z,common-page-size=4096
+ldflags-$(CONFIG_BAREMETAL)		+=-Wl,-z,max-page-size=4096
+ldflags-$(CONFIG_BAREMETAL)		+=-Wl,--build-id=none
 
 # Determine the language standard.
 ifneq ($(CONFIG_STD),)

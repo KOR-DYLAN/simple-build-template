@@ -1,1 +1,1 @@
-boot-$(CONFIG_BOOT_BL2)	+=bl2
+boot-$(CONFIG_BOOT_ARMV8A)	+=boot-armv8a
