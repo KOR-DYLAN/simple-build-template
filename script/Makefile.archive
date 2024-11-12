@@ -1,5 +1,6 @@
 include .config
 include script/Makefile.toolchain.$(TOOLCHAIN)
+include script/Makefile.libc
 include $(PROJECT_BASE)/objects.mk
 
 ifeq ($(TOOLCHAIN),armclang)

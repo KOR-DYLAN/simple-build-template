@@ -1,0 +1,12 @@
+# Check Stack Protector
+ifeq ($(CONFIG_STACK_PROTECTOR),y)
+    # CONFIG_STACK_PROTECTOR_MODE: all | strong
+    ifneq ($(CONFIG_STACK_PROTECTOR_MODE),)
+        CFLAGS  +=-fstack-protector-$(CONFIG_STACK_PROTECTOR_MODE)
+    else
+        CFLAGS  +=-fstack-protector
+    endif
+    CFLAGS  +=-DSTACK_PROTECTOR_ENABLED
+else
+    CFLAGS  +=-fno-stack-protector
+endif

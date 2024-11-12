@@ -30,6 +30,9 @@ else
     FROMELF :=fromelf
 endif
 
+# Insert 'ARM_LINK' symbol
+cflags-y                        +=-DUSE_ARM_LINK
+
 # Common ASM/C Compiler Options
 cflags-$(CONFIG_BAREMETAL)		+=-fno-common
 cflags-$(CONFIG_BAREMETAL)		+=-ffunction-sections
@@ -41,12 +44,6 @@ cflags-$(CONFIG_NO_JUMP_TABLES)		+=-fno-jump-tables
 # the built-in function function is disabled.
 cflags-$(CONFIG_NO_BUILTIN)			+=-fno-builtin
 
-# Do not search the standard system directories for header files.
-cflags-$(CONFIG_NOSTDINC)			+=-nostdinc
-
-# Do not use the standard system startup files or libraries when linking.
-# ldflags-$(CONFIG_NOSTDLIB)			+=-nostdlib
-
 # no floating-point or Advanced SIMD registers
 cflags-$(CONFIG_GENERAL_REGS_ONLY)	+=-mgeneral-regs-only
 
@@ -57,7 +54,7 @@ cflags-$(CONFIG_STRICT_ALIGN)		+=-mstrict-align
 cflags-$(CONFIG_BAREMETAL)		+=-ffreestanding
 #ldflags-$(CONFIG_BAREMETAL)		+=-z noexecstack
 # ldflags-$(CONFIG_BAREMETAL)		+=--diag_error=warning
-ldflags-$(CONFIG_BAREMETAL)		+=--remove --info=unused,unusedsymbols
+ldflags-$(CONFIG_BAREMETAL)		+=--remove --info=sizes,unused,unusedsymbols
 #ldflags-$(CONFIG_BAREMETAL)		+=-Wl,--sort-section=alignment
 #ldflags-$(CONFIG_BAREMETAL)		+=-Wl,-z,common-page-size=4096
 #ldflags-$(CONFIG_BAREMETAL)		+=-Wl,-z,max-page-size=4096
@@ -82,9 +79,11 @@ endif
 
 # Build options according to build type
 ifeq ($(BUILD_TYPE),debug)
+    override CONFIG_ENABLE_ASSERTIONS=y
     CFLAGS	+=-O0 -g -DDEBUG=1
     LDFLAGS	+=--lto_level=O0
 else ifeq ($(BUILD_TYPE),release)
+    CONFIG_ENABLE_ASSERTIONS    ?=n
     CFLAGS	+=-O2 -DDEBUG=0
     LDFLAGS	+=--lto_level=O2
 else
@@ -93,6 +92,8 @@ endif
 
 # Platform
 ifneq ($(CONFIG_PLATFORM),)
-    CFLAGS		+=-Iinclude/platform/$(CONFIG_PLATFORM)
-    CPPFLAGS	+=-Iinclude/platform/$(CONFIG_PLATFORM)
+    CFLAGS		+=-Iplatform/$(CONFIG_PLATFORM)
+    CPPFLAGS	+=-Iplatform/$(CONFIG_PLATFORM)
 endif
+
+include script/Makefile.stack_protector

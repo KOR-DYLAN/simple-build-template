@@ -1,0 +1,26 @@
+ifeq ($(CONFIG_NOSTDINC),y)
+    cflags-y	+=-nostdinc
+    cflags-y	+=-Iinclude/library/c
+    ifeq ($(CONFIG_AARCH64),y)
+        LIBC_ARCH   :=aarch64
+    else
+        $(error "Invalid Architecture...")
+    endif
+    cflags-y	+=-Iinclude/library/c/$(LIBC_ARCH)
+endif
+
+ifeq ($(CONFIG_NOSTDLIB),y)
+    cflags-y	+=-nostdlib
+    ifeq ($(CONFIG_TOOLCHAIN),armclang)
+        ldflags-y	+=--no_scanlib
+    else
+        ldflags-y	+=-nostdlib
+    endif
+
+    ifeq ($(CONFIG_ENABLE_ASSERTIONS),y)
+        ENABLE_ASSERTIONS=1
+    else
+        ENABLE_ASSERTIONS=0
+    endif
+    cflags-y	+=-DENABLE_ASSERTIONS=$(ENABLE_ASSERTIONS)
+endif

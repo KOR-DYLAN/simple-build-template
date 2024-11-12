@@ -1,0 +1,15 @@
+QEMU		:=$(CONFIG_QEMU)
+QMACHINE	:=$(CONFIG_QEMU_MACHINE)
+QCPU		:=$(CONFIG_QEMU_CPU)
+QSMP		:=$(CONFIG_QEMU_SMP)
+QRAM		:=$(CONFIG_QEMU_RAM)
+QIMAGE		:=$(CONFIG_QEMU_IMAGE)
+QFLAGS		:=$(CONFIG_QEMU_FLAGS)
+
+phony+=qrun
+qrun:
+	$(QEMU) -M $(QMACHINE) -cpu $(QCPU) -smp $(QSMP) -m $(QRAM) -kernel $(QIMAGE) $(QFLAGS)
+
+phony+=qdebug
+qdebug:
+	$(QEMU) -M $(QMACHINE) -cpu $(QCPU) -smp $(QSMP) -m $(QRAM) -kernel $(QIMAGE) $(QFLAGS) -S -s

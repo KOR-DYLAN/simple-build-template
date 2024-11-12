@@ -38,12 +38,6 @@ cflags-$(CONFIG_NO_JUMP_TABLES)		+=-fno-jump-tables
 # the built-in function function is disabled.
 cflags-$(CONFIG_NO_BUILTIN)			+=-fno-builtin
 
-# Do not search the standard system directories for header files.
-cflags-$(CONFIG_NOSTDINC)			+=-nostdinc
-
-# Do not use the standard system startup files or libraries when linking.
-ldflags-$(CONFIG_NOSTDLIB)			+=-nostdlib
-
 # no floating-point or Advanced SIMD registers
 cflags-$(CONFIG_GENERAL_REGS_ONLY)	+=-mgeneral-regs-only
 
@@ -79,6 +73,7 @@ endif
 
 # Build options according to build type
 ifeq ($(BUILD_TYPE),debug)
+    override CONFIG_ENABLE_ASSERTIONS=y
     CFLAGS	+=-O0 -g -DDEBUG=1
     LDFLAGS	+=-O0
 else ifeq ($(BUILD_TYPE),release)
@@ -90,6 +85,8 @@ endif
 
 # Platform
 ifneq ($(CONFIG_PLATFORM),)
-    CFLAGS		+=-Iinclude/platform/$(CONFIG_PLATFORM)
-    CPPFLAGS	+=-Iinclude/platform/$(CONFIG_PLATFORM)
+    CFLAGS		+=-Iplatform/$(CONFIG_PLATFORM)
+    CPPFLAGS	+=-Iplatform/$(CONFIG_PLATFORM)
 endif
+
+include script/Makefile.stack_protector

@@ -27,6 +27,9 @@ endif
 
 # include .config
 -include $(SOURCE_DIR)/.config
+ifeq ($(CONFIG_LIBRARY_ARCH_ARMV8A),y)
+    include script/armv8a-cpu-ops.mk
+endif
 
 # toolchain basic config
 ifneq ($(CONFIG_CROSS_COMPILE),)
@@ -50,6 +53,9 @@ export Q
 export CROSS_COMPILE
 export TOOLCHAIN
 export NPROC
+export DEFINES
+export CPU_CFLAGS
+export CPU_LDFLAGS
 
 # Targets
 all: build
@@ -64,7 +70,7 @@ build:
 ifeq (,$(wildcard $(SOURCE_DIR)/.config))
 	$(error can not found '$(SOURCE_DIR)/.config'...)
 endif
-	@rm -f $(BUILD_BASE)/link_lists.mk
+	@rm -f $(BUILD_BASE)/*.mk
 	$(Q)$(foreach it, $(DIR_LISTS), $(MAKE) -f script/Makefile.build WORKING_DIR=$(it);)
 
 phony+=clean
@@ -84,5 +90,7 @@ endif
 phony+=run
 run: build
 	./output/image.$(EXE_EXT)
+
+include script/Makefile.qemu
 
 .PHONY: $(phony)

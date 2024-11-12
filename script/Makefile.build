@@ -1,5 +1,6 @@
 include .config
 include script/Makefile.toolchain.$(TOOLCHAIN)
+include script/Makefile.libc
 include $(WORKING_DIR)/Makefile
 
 $(shell mkdir -p $(BUILD_BASE)/$(WORKING_DIR))
@@ -54,14 +55,15 @@ all: $(recipe)
 	@rm -f $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)/objects.tmp.mk
 	$(Q)$(MAKE) -f script/Makefile.archive PROJECT_BASE=$(BUILD_BASE)/$(WORKING_DIR)/$(basename $@) TARGET=$(OUTPUT_BASE)/libs/lib$(basename $@).a
 	@echo "link_lib-y +=$(basename $@)" >> $(BUILD_BASE)/link_lists.mk
+	@echo "include $(BUILD_BASE)/$(WORKING_DIR)/$(basename $@)/objects.mk" >> $(BUILD_BASE)/libobjects.mk
 
 $(BUILD_BASE)/%.o: %.S
 	@echo "[AS]        $@"
-	$(Q)$(AS) -x assembler-with-cpp $(ASFLAGS) -D__ASSEMBLER__ $(CFLAGS) -Iinclude -I$(basename $<) -Wp,-MD,$@.d -MT $@ -MP -c $< -o $@
+	$(Q)$(AS) -x assembler-with-cpp $(ASFLAGS) -D__ASSEMBLER__ $(DEFINES) $(CPU_CFLAGS) $(CFLAGS) -Iinclude -I$(basename $<) -Wp,-MD,$@.d -MT $@ -MP -c $< -o $@
 
 $(BUILD_BASE)/%.o: %.c
 	@echo "[CC]        $@"
-	$(Q)$(CC) $(CFLAGS) -Iinclude -I$(basename $<) -Wp,-MD,$@.d -MT $@ -MP -c $< -o $@
+	$(Q)$(CC) $(DEFINES) $(CPU_CFLAGS) $(CFLAGS) -Iinclude -I$(basename $<) -Wp,-MD,$@.d -MT $@ -MP -c $< -o $@
 
 $(BUILD_BASE)/%.lds: %.lds.S
 	@echo "[PP]        $@"
