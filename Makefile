@@ -57,6 +57,9 @@ export DEFINES
 export CPU_CFLAGS
 export CPU_LDFLAGS
 
+# include toolchain
+-include script/Makefile.toolchain.$(TOOLCHAIN)
+
 # Targets
 all: build
 
